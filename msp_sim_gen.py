@@ -11,11 +11,14 @@ def status(*args, **kwargs):
 parser = ArgumentParser("msp_sim_gen.py")
 parser.add_argument("genealogy", help="Genealogy file")
 parser.add_argument("output_dir", type=Path, help="Output directory for tree sequences")
+parser.add_argument("--prefix", "-a", default="", help="Prefix for output files for batch runs")
+
 parser.add_argument("--proband-file", "-p", default=None, help="List of probands")
 parser.add_argument("--length", "-l", default=1, type=int, help="Length of chromosome in basepairs")
 parser.add_argument("--recomb-rate", "-r", default=0, type=float, help="Recombination rate per base pair per generation")
 parser.add_argument("--replicates", "-n", type=int, default=1, help="Number of replicate simulations")
 parser.add_argument("--no-provenance", action="store_true", help="Do not record additional info")
+
 args = parser.parse_args()
 
 clock_start = datetime.now()
@@ -54,7 +57,7 @@ replicates = msprime.simulate(sample_size,
 
 status(f"Simulating {args.replicates} replicates...")
 for i, ts in enumerate(replicates, 1):
-    outfile = f"{args.output_dir}/replicate_{i:04}.ts"
+    outfile = f"{args.output_dir}/replicate_{args.prefix}_{i:04}.ts"
     ts.dump(outfile)
     status(i, end=" ")
 
