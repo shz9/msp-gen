@@ -4,7 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 
-ped = msprime.Pedigree.read_txt("balsac.tsv")
+# An example script to simulate over a genealogy and count the number of
+# coalescent events
+
+ped = msprime.Pedigree.read_txt("data/balsac.tsv")
 rep = 100
 probands = ped.get_proband_indices()
 ped.set_samples(num_samples=len(probands))
