@@ -31,8 +31,8 @@ source ~/.bashrc
 
 You should now see `(base)` in your shell prompt, indicating that you are using
 the `base` conda environment. Refer to
-[https://conda.io/projects/conda/en/latest/user-guide/install/linux.html](these
-instructions) if you have issues.
+[https://conda.io/projects/conda/en/latest/user-guide/install/linux.html](these instructions)
+if you have issues.
 
 ### Create an isolated `conda` environment
 
