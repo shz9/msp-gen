@@ -71,5 +71,5 @@ sets up the environment ([INSTALL.md](INSTALL.md)) and invokes
 
 # TODO
 
-[ ] document the functions in the `batch_sim` scripts
-[ ] provide input to `batch_sim` as input arguments
+- [ ] document the functions in the `batch_sim` scripts
+- [ ] provide input to `batch_sim` as input arguments
