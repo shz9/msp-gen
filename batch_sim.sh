@@ -6,8 +6,6 @@
 #PBS -l nodes=1:ppn=1,pmem=2gb
 #PBS -N gen_msp
 #PBS -t 1-10
-#PBS -o gen_msp_log/${PBS_JOBID}
-#PBS -e gen_msp_log/${PBS_JOBID}
 
 # on Abacus, uncomment the line below for small simulations (under 1k individuals
 # with low recombination rate). This will put the job into high proority queue.
@@ -19,8 +17,6 @@
 source activate msp-gen
 # set working directory
 cd msp-gen
-# prepare output dir
-mkdir -p gen_msp_log
 
 ## Simulation paramters
 
