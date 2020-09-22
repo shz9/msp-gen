@@ -15,12 +15,12 @@
 
 ## Environment setup
 
-# prepare output dir
-mkdir -p gen_msp_log
 # activate the conda environment
 source activate msp-gen
 # set working directory
 cd msp-gen
+# prepare output dir
+mkdir -p gen_msp_log
 
 ## Simulation paramters
 
