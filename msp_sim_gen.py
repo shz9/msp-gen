@@ -51,8 +51,7 @@ replicates = msprime.simulate(sample_size,
                               end_time=t,
                               length=args.length,
                               recombination_rate=args.recomb_rate,
-                              num_replicates=args.replicates,
-                              record_provenance=not args.no_provenance)
+                              num_replicates=args.replicates)
 
 status(f"Simulating {args.replicates} replicates...")
 for i, ts in enumerate(replicates, 1):
