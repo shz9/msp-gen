@@ -11,6 +11,6 @@ args = parser.parse_args()
 
 ts = tskit.load(args.input_file)
 
-tsm = msprime.mutate(ts, rate = args.mutation_rate)
+tsm = msprime.mutate(ts, rate=args.mutation_rate)
 
 tsm.dump(args.output_file)

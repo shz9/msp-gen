@@ -6,12 +6,13 @@ import numpy as np
 # SEX: 1 = male, 2 = female
 # Individual = ("ID", "father", "mother", "time", "sex")
 
+
 def simulate_pedigree(n_founders, n_generations,
                       avg_offspring=2,
                       avg_immigrants=2,
                       seed=None,
                       no_progress=True):
-    
+
     rng = rnd.default_rng(seed)
     current_males, current_females = set(), set()
     next_males, next_females = set(), set()
@@ -86,23 +87,30 @@ def simulate_pedigree(n_founders, n_generations,
 
     return np.array(ped)
 
+
 if __name__ == "__main__":
     from argparse import ArgumentParser
     parser = ArgumentParser("Simulate an extended family genealogy")
-    parser.add_argument("founders", type=int, help="Number of founder individuals")
-    parser.add_argument("generations", type=int, help="Number of generations to simulate")
-    parser.add_argument("--children", "-c", type=float, default=2.0, help="Average number of offspring per family")
-    parser.add_argument("--immigrants", "-i", type=float, default=2.0, help="Average number of immigrants per generation")
-    parser.add_argument("--seed", "-s", type=int, default=None, help="Random seed")
+    parser.add_argument("founders", type=int,
+                        help="Number of founder individuals")
+    parser.add_argument("generations", type=int,
+                        help="Number of generations to simulate")
+    parser.add_argument("--children", "-c", type=float, default=2.0,
+                        help="Average number of offspring per family")
+    parser.add_argument("--immigrants", "-i", type=float, default=2.0,
+                        help="Average number of immigrants per generation")
+    parser.add_argument("--seed", "-s", type=int,
+                        default=None, help="Random seed")
     parser.add_argument("--no-progress", action="store_true")
-    parser.add_argument("--output", "-o", default="genealogy.tsv", help="Output file")
+    parser.add_argument(
+        "--output", "-o", default="genealogy.tsv", help="Output file")
     args = parser.parse_args()
 
     ped = simulate_pedigree(args.founders, args.generations,
-                            avg_offspring = args.children,
-                            avg_immigrants = args.immigrants,
-                            seed = args.seed,
+                            avg_offspring=args.children,
+                            avg_immigrants=args.immigrants,
+                            seed=args.seed,
                             no_progress=args.no_progress)
 
-    np.savetxt(args.output, ped, fmt="%d", delimiter="\t", header="individual\tfather\tmother\ttime\tsex")
-
+    np.savetxt(args.output, ped, fmt="%d", delimiter="\t",
+               header="individual\tfather\tmother\ttime\tsex")

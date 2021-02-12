@@ -3,8 +3,8 @@
 This repository contains the driver scripts for genealogical simulations.
 For installation instructions, consult [INSTALL.md](./INSTALL.md).
 
-# `msp_sim_gen.py`
-<a name="msp_sim_gen"></a>
+# `simulate.py`
+<a name="simulate"></a>
 
 Main simulation script - simulate genomes of probands on a genealogy, outputting
 tree sequences for each replicate.
@@ -32,7 +32,7 @@ Genealogy is formatted as a table with at least 3 columns:
 The only requirements is for the IDs to be unique. See
 [balsac.tsv](./data/balsac.tsv) for an example.
 
-Genealogies can also be simulated with [`sim_gen.py`](#sim_gen) script.
+Simulated genealogies can also be created with [`create_genealogy.py`](#create_genealogy) script.
 
 ## Probands
 <a name="probands"></a>
@@ -43,8 +43,8 @@ children. If you have a specific list of proband IDs, pass them in
 
 The proband file have one individual ID per line.
 
-# `sim_gen.py`
-<a name="sim_gen"></a>
+# `create_genealogy.py`
+<a name="create_genealogy"></a>
 
 A script to simulate genealogical relationships.
 
@@ -67,7 +67,7 @@ desired number of generations.
 
 An array job for simulating replicate chromosomes over a genealogy. The script
 sets up the environment ([INSTALL.md](INSTALL.md)) and invokes
-[`msp_gen_sim.py`](#msp_gen_sim).
+[`simulate.py`](#simulate).
 
 # TODO
 

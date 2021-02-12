@@ -1,6 +1,5 @@
 import msprime
 import tskit
-import sys
 from argparse import ArgumentParser
 import json
 import stdpopsim
@@ -12,7 +11,8 @@ parser = ArgumentParser("sim_complete")
 parser.add_argument("input_ts", help="input incomplete tree sequence")
 parser.add_argument("output_ts", help="output tree sequence file")
 parser.add_argument(
-    "-m", "--model", help="Contiuation model", default="DTWF", choices=["DTWF", "OOA"]
+    "-m", "--model", help="Contiuation model",
+    default="DTWF", choices=["DTWF", "OOA"]
 )
 parser.add_argument("-p", "--population", help="source population")
 parser.add_argument(

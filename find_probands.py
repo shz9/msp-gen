@@ -3,14 +3,19 @@ import numpy as np
 import pandas as pd
 from argparse import ArgumentParser
 
+
 def status(*args, **kwargs):
     print(*args, **kwargs, file=sys.stderr)
 
-parser = ArgumentParser("fild-probands.py - filter all individuals with no children")
+
+parser = ArgumentParser(
+    "fild-probands.py - filter all individuals with no children")
 parser.add_argument("genealogy", help="Genealogy file")
 parser.add_argument("output", help="Output file")
-parser.add_argument("--year", "-y", default=None, help="Remove individuals before this year")
-parser.add_argument("--delimiter", "-d", default=None, help="Delimiter for genealogy")
+parser.add_argument("--year", "-y", default=None,
+                    help="Remove individuals before this year")
+parser.add_argument("--delimiter", "-d", default=None,
+                    help="Delimiter for genealogy")
 
 args = parser.parse_args()
 
@@ -19,8 +24,8 @@ ped = pd.read_table(args.genealogy, delimiter=args.delimiter)
 
 status("Finding probands...")
 everyone = set(ped.ind)
-fathers  = set(ped.father)
-mothers  = set(ped.mother)
+fathers = set(ped.father)
+mothers = set(ped.mother)
 probands = everyone.difference(mothers.union(fathers))
 status(f"Found {len(probands)} probands...")
 

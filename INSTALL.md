@@ -7,12 +7,17 @@ the environment.
 The installation instructions are specific to MUGQIC `abacus` cluster, and may
 differ on your system.
 
-## Environment
+# Environment
 
 We use `conda` to install dependencies and manage the environment. If you have
 `conda` installed, proceed to the next section.
 
-### `conda` installation
+Alternatively, you can use `virtualenv`, as long as you can install the `gsl`
+library dependency. Note that this is not a python dependency, which is why
+`conda` is preferred. In addition, the batch scripts assume that a `conda`
+environment has been set up.
+
+## Option 1 - `conda` installation
 
 Since `abacus` uses an older version of `python` by default, we use `miniconda2`
 to install the environment:
@@ -56,45 +61,47 @@ Now, activate the environment:
 conda activate msp-gen
 ```
 
-Your shell prompt should not have `(msp-gen)` in it. You can confirm you have the
+Your shell prompt should now have `(msp-gen)` in it. You can confirm you have the
 right `python` executable with `which python` - it should be something like
 `~/miniconda2/envs/msp-gen/bin/python`.
+
+## Option 2 - `virtualenv`
 
 
 ### `msprime` dependency installation
 
 `msprime` relies on the `GSL` library for high-performance numerical computation.
+
+#### With `conda`
+
 This library is not present by default on `abacus`, so we use conda:
 
 ```shell
 conda install gsl
 ```
 
-## `msprime` installation
+#### Other
 
-Clone the development version of `msprime` from github:
-
-```shell
-git clone https://github.com/tskit-dev/msprime.git --recurse-submodules msprime_dev
-```
-
-Now, descend into the `msprime` directory and compile the code:
+Of you have access to a system package manager, there is an excellent change `gsl` is available:
 
 ```shell
-cd msprime_dev
-make
+sudo apt install gsl-devel
 ```
 
-Now, install `msprime` into your `msp-gen` environment:
+# Python dependencies - `msprime` and `stdpopsim`
+
+The python packages can be installed with `pip`:
 
 ```shell
-python setup.py install
+pip install -r requirements.txt
 ```
 
-## Test simulation
+Note that we are presently using the `git HEAD` of `msprime`. This will change in the near future.
+
+# Test simulation
 
 Run a test simulation:
 
 ```shell
-python msp_sim_gen.py data/balsav.tsv test_sim
+python simulate.py data/balsav.tsv test_sim
 ```
