@@ -12,28 +12,23 @@ def status(*args, **kwargs):
 
 parser = ArgumentParser("simulate.py")
 parser.add_argument("genealogy", help="Genealogy file")
-parser.add_argument("output_dir", type=Path,
-                    help="Output directory for tree sequences")
-parser.add_argument("--prefix", "-a", default="",
-                    help="Prefix for output files for batch runs")
-
-parser.add_argument("--proband-file", "-p", default=None,
-                    help="List of probands")
-parser.add_argument("--length", "-l", default=1000, type=int,
-                    help="Length of chromosome in base-pairs")
-parser.add_argument("--recomb-rate", "-r", default=0, type=float,
-                    help="Recombination rate per base-pair per generation")
-parser.add_argument("--replicates", "-n", type=int, default=1,
-                    help="Number of replicate simulations")
+parser.add_argument("output_ts", type=Path, help="Output tree sequence file")
+parser.add_argument("--proband-file", "-p", default=None, help="List of probands")
+parser.add_argument(
+    "--length", "-l", default=1000, type=int, help="Length of chromosome in base-pairs"
+)
+parser.add_argument(
+    "--recomb-rate",
+    "-r",
+    default=0,
+    type=float,
+    help="Recombination rate per base-pair per generation",
+)
 
 args = parser.parse_args()
 
 clock_start = datetime.now()
 status(f"Started at {clock_start}")
-
-if not args.output_dir.exists():
-    status(f"Creating {args.output_dir}...")
-    args.output_dir.mkdir()
 
 status("Reading pedigree file...")
 ped = msprime.Pedigree.read_txt(args.genealogy)
@@ -53,20 +48,18 @@ status(f"Using {sample_size} probands...")
 
 t = int(max(ped.time))
 
-replicates = msprime.simulate(sample_size,
-                              pedigree=ped,
-                              model='wf_ped',
-                              end_time=t,
-                              length=args.length,
-                              recombination_rate=args.recomb_rate,
-                              num_replicates=args.replicates)
+sim = msprime.simulate(
+    sample_size,
+    pedigree=ped,
+    model="wf_ped",
+    end_time=t,
+    length=args.length,
+    recombination_rate=args.recomb_rate,
+    num_replicates=1
+)
 
-status(f"Simulating {args.replicates} replicates...")
-for i, ts in enumerate(replicates, 1):
-    outfile = f"{args.output_dir}/replicate_{args.prefix}_{i:04}.ts"
-    ts.dump(outfile)
-    status(i, end=" ")
+next(sim).dump(args.output_ts)
 
 clock_stop = datetime.now()
-status(f"\nDone at {clock_stop}")
+status(f"Done at {clock_stop}")
 status(f"Took {clock_stop - clock_start}")

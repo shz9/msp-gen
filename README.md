@@ -6,18 +6,16 @@ For installation instructions, consult [INSTALL.md](./INSTALL.md).
 # `simulate.py`
 <a name="simulate"></a>
 
-Main simulation script - simulate genomes of probands on a genealogy, outputting
-tree sequences for each replicate.
+Main simulation script - simulate genomes of probands on a genealogy, and
+output a single tree sequence.
 
 | Argument                | Required | Type      | Default | Description                                                                                                     |
 | --------                | -------- | ----      | ------- | -----------                                                                                                     |
 | `genealogy`             | yes      | file      |         | genealogy input table - 3 columns, whitespace-separated. See [genealogy format](#genealogy_format) for details. |
-| `output`                | yes      | directory |         | output path.                                                                                                    |
-| `--prefix` / `-a`       |          | string    | `""`    | prefix to append to output file. Used in batch jobs.                                                            |
+| `output`                | yes      | directory |         | output tree sequence.                                                                                                    |
 | `--proband-file` / `-p` |          | file      | `None`  | proband IDs, one per line. See [probands](#probands) for details.                                               |
 | `--length` / `-l`       |          | int       | `1000`  | length of the genome, in base-pairs                                                                             |
 | `--recomb-rate` / `-r`  |          | float     | `0`     | recombination rate, per base pair-pair per generation                                                           |
-| `--replicates` / `-n`   |          | int       | `1`     | number of simulation replicates. For running on a cluster, use an array job instead.                            |
 | `--no-provenance`       |          | flag      |         | do not record run-specific metadata. Temporary workaround.                                                      |
 
 ## Genealogy format
@@ -65,9 +63,8 @@ desired number of generations.
 # `batch_sim.sh`
 <a name="batch_sim"></a>
 
-An array job for simulating replicate chromosomes over a genealogy. The script
-sets up the environment ([INSTALL.md](INSTALL.md)) and invokes
-[`simulate.py`](#simulate).
+An array job for simulating a chromosome over a genealogy. The script sets up
+the environment ([INSTALL.md](INSTALL.md)) and invokes [`simulate.py`](#simulate).
 
 # TODO
 

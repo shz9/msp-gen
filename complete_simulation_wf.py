@@ -20,7 +20,7 @@ args = parser.parse_args()
 ts = tskit.load(args.input_ts)
 
 # read the recombination map from the provenance
-provenance = json.loads(ts.provenance(0).record)
+provenance = json.loads(str(ts.provenance(0).record))
 ts_recomb_rate = provenance["parameters"]["recombination_rate"]
 
 
@@ -30,4 +30,4 @@ sim = msprime.simulate(
     Ne=args.population_size,
     recombination_rate=ts_recomb_rate)
 
-sim.dump(args.output_ts)
+next(sim).dump(args.output_ts)
