@@ -28,6 +28,7 @@ sim = msprime.simulate(
     from_ts=ts,
     model="dtwf",
     Ne=args.population_size,
-    recombination_rate=ts_recomb_rate)
+    recombination_rate=ts_recomb_rate,
+    num_replicates=1)
 
 next(sim).dump(args.output_ts)
