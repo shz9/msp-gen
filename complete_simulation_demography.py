@@ -19,6 +19,7 @@ parser.add_argument(
 )
 parser.add_argument("-p", "--population", default='EUR',
                     help="source population")
+parser.add_argument("-q", "--no-citations", action="store_true")
 
 args = parser.parse_args()
 ts = tskit.load(args.input_ts)
@@ -67,5 +68,10 @@ sim = msprime.simulate(
     # TODO Make the replicate interface consistent across scripts
     num_replicates=1
 )
+
+if not args.no_citations:
+    print(model.description)
+    for citation in model.citations:
+        print(citation.author, citation.year, citation.doi)
 
 next(sim).dump(args.output_ts)
