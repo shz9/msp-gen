@@ -98,6 +98,16 @@ pip install -r requirements.txt
 
 Note that we are presently using the `git HEAD` of `msprime`. This will change in the near future.
 
+# `bcftools` optional, for VCF/BCF export
+
+If you want to export the results of the simulations into VCF, you would need
+to install `bcftools`. This can be installed through `conda`, using the
+`bioconda` channel:
+
+```shell
+conda install -c bioconda bcftools
+```
+
 # Test simulation
 
 Run a test simulation:
