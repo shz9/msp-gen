@@ -26,7 +26,13 @@ class Runner:
 
 # TODO - provide a way to subsample based on a file with IDs
 def ts_to_bcf_single(
-    ts_file, out_file, runner, af_cutoff=0, n_subsample=None, remove_singletons=False
+    ts_file,
+    out_file,
+    runner,
+    af_cutoff=0,
+    n_subsample=None,
+    remove_singletons=False,
+    use_vcf=False,
 ):
 
     ts = tskit.load(ts_file)
@@ -71,15 +77,17 @@ def ts_to_bcf_single(
                 sample_individuals, n_subsample, replace=False
             )
 
-        # TODO: This will probably fail if metadata isn't present
-        sample_names = [ind.metadata.decode("utf8") for ind in sample_individuals]
+        sample_names = [
+            str(ind.metadata["individual_name"]) for ind in sample_individuals
+        ]
         sample_ids = [ind.id for ind in sample_individuals]
 
         read_fd, write_fd = os.pipe()
         write_pipe = os.fdopen(write_fd, "w")
         with open(out_file, "w") as f:
+            output_format = "v" if use_vcf else "b"
             proc = subprocess.Popen(
-                ["bcftools", "view", "-O", "b"], stdin=read_fd, stdout=f
+                ["bcftools", "view", "-O", output_format], stdin=read_fd, stdout=f
             )
             ts.write_vcf(
                 write_pipe, individuals=sample_ids, individual_names=sample_names
@@ -91,25 +99,26 @@ def ts_to_bcf_single(
                 raise RuntimeError("bcftools failed with status:", proc.returncode)
 
 
-def bcf_convert_chrom(bcf_file, chrom_num, runner):
+def bcf_convert_chrom(bcf_file, chrom_num, runner, use_vcf):
     with tempfile.NamedTemporaryFile(mode="w", delete=False) as f:
         f.write("1\t" + str(chrom_num) + "\n")
-
+        output_format = "v" if use_vcf else "b"
         convert_chrom_cmd = (
             "bcftools annotate --rename-chrs {} {} | "
-            "bcftools view -O b > tmp && mv tmp {} && "
+            "bcftools view -O {} > tmp && mv tmp {} && "
             "rm {}"
-        ).format(f.name, bcf_file, bcf_file, f.name)
+        ).format(f.name, bcf_file, output_format, bcf_file, f.name)
         runner.run(convert_chrom_cmd)
 
 
-def concat_bcf(bcf_files, out_file, runner):
-    concat_chrom_cmd = "bcftools concat -o {} -O b --threads 2"
+def concat_bcf(bcf_files, out_file, runner, use_vcf):
+    output_format = "v" if use_vcf else "b"
+    concat_chrom_cmd = "bcftools concat -o {} -O {} --threads 2"
 
     for f in bcf_files:
         concat_chrom_cmd += " " + f
 
-    concat_chrom_cmd = concat_chrom_cmd.format(out_file)
+    concat_chrom_cmd = concat_chrom_cmd.format(out_file, output_format)
 
     runner.run(concat_chrom_cmd)
 
@@ -132,16 +141,17 @@ def main(args):
                 af_cutoff=args.af_cutoff,
                 n_subsample=args.n_subsample,
                 remove_singletons=args.remove_singletons,
+                use_vcf=args.use_vcf,
             )
-            bcf_convert_chrom(tmp_bcf_file, chrom_num, runner)
+            bcf_convert_chrom(tmp_bcf_file, chrom_num, runner, args.use_vcf)
 
-        concat_bcf(tmp_bcf_files, out_file, runner)
+        concat_bcf(tmp_bcf_files, out_file, runner, args.use_vcf)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--ts-file", nargs="*", required=True)
-    parser.add_argument("-o", "--out-file", required=True)
+    parser.add_argument("ts_file", nargs="*")
+    parser.add_argument("out_file")
     parser.add_argument(
         "-s",
         "--n_subsample",
@@ -163,6 +173,8 @@ if __name__ == "__main__":
         help="Drop sites with a single mutation",
     )
     parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument("-vcf", "--use-vcf", action="store_true")
+
     parser.add_argument("-T", "--test", action="store_true")
 
     args = parser.parse_args()

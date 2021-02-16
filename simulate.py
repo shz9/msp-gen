@@ -1,4 +1,5 @@
 import msprime
+import tskit
 import numpy as np
 import sys
 from argparse import ArgumentParser
@@ -55,10 +56,46 @@ sim = msprime.simulate(
     end_time=t,
     length=args.length,
     recombination_rate=args.recomb_rate,
-    num_replicates=1
+    num_replicates=1,
 )
 
-next(sim).dump(args.output_ts)
+status("Converting tables...")
+
+# record individual id metadata
+tables = next(sim).dump_tables()
+
+individual_metadata_schema = tskit.MetadataSchema(
+    {
+        "codec": "json",
+        "type": "object",
+        "properties": {
+            # Name of the individual in the pedigree file
+            "individual_name": {"type": "integer"},
+            "is_sample": {"type": "boolean"},
+        },
+        "required": ["individual_name", "is_sample"],
+    }
+)
+meta_individuals = tskit.IndividualTable()
+
+meta_individuals.metadata_schema = individual_metadata_schema
+for i, ind in enumerate(tables.individuals):
+    ind_name = int(ped.individual[i]) if i < ped.num_individuals else -1
+    is_sample = bool(ped.is_sample[i]) if i < ped.num_individuals else False
+    meta_individuals.add_row(
+        metadata={"individual_name": ind_name, "is_sample": is_sample},
+    )
+
+tables.individuals.set_columns(
+    flags=tables.individuals.flags,
+    location=tables.individuals.location,
+    location_offset=tables.individuals.location_offset,
+    metadata=meta_individuals.ll_table.metadata,
+    metadata_offset=meta_individuals.ll_table.metadata_offset,
+)
+
+tables.individuals.metadata_schema = individual_metadata_schema
+tables.tree_sequence().dump(args.output_ts)
 
 clock_stop = datetime.now()
 status(f"Done at {clock_stop}")
