@@ -2,6 +2,7 @@ import os
 import argparse
 import subprocess
 import numpy as np
+import pandas as pd
 import tempfile
 
 import tskit
@@ -62,15 +63,40 @@ def ts_to_bcf_single(
             tables.delete_sites(sites_to_delete, record_provenance=False)
             ts = tables.tree_sequence()
 
-        sample_individuals = []
+        
+        # Obtain a list of the individuals and their nodes:
+        ind_ids = []
+        ind_nodes = []
+
         for ind in ts.individuals():
-            if len(ind.nodes) == 0:
-                continue
-            # diploid - two nodes, both the same individual
-            if ind.nodes[0] in sample_nodes:
-                assert len(ind.nodes) == 2
-                assert ind.nodes[1] in sample_nodes
-                sample_individuals.append(ind)
+            if len(ind.nodes) == 2:
+                ind_ids.extend([ind, ind])
+                ind_nodes.extend(ind.nodes)
+
+        # Construct a dataframe of those individuals:
+        ind_df = pd.DataFrame({'Individual ID': ind_ids, 'Nodes': ind_nodes})
+
+        # Merge with the sampled nodes list:
+        merged_df = ind_df.merge(pd.DataFrame({'Nodes': sample_nodes}))
+        
+        # Count how many times an individual ID occurs in the merged table:
+        ind_counts = merged_df['Individual ID'].value_counts()
+
+        # Keep only individuals that occurs twice:
+        sample_individuals = list(ind_counts[ind_counts == 2].index)
+        
+        # Shadi: This portion of the code can be slow for large pedigrees, replacing 
+        # with pandas merge above.
+        
+        #sample_individuals = []
+        #for ind in ts.individuals():
+        #    if len(ind.nodes) == 0:
+        #        continue
+        #    # diploid - two nodes, both the same individual
+        #    if ind.nodes[0] in sample_nodes:
+        #        assert len(ind.nodes) == 2
+        #        assert ind.nodes[1] in sample_nodes
+        #        sample_individuals.append(ind)
 
         if n_subsample is not None:
             sample_individuals = np.random.choice(
