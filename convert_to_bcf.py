@@ -82,7 +82,7 @@ def ts_to_bcf_single(
         # Count how many times an individual ID occurs in the merged table:
         ind_counts = merged_df['Individual ID'].value_counts()
 
-        # Keep only individuals that occurs twice:
+        # Keep only individuals that occur twice:
         sample_individuals = list(ind_counts[ind_counts == 2].index)
         
         # Shadi: This portion of the code can be slow for large pedigrees, replacing 
