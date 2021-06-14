@@ -94,7 +94,7 @@ def ts_to_bcf_single(
 
         final_list = individual_df.merge(pd.DataFrame({'Individual': sample_individuals}))
         
-        sample_names = list(final_list['IndividualName'].values)
+        sample_names = list(final_list['IndividualName'].astype(str).values)
         sample_ids = list(final_list['Individual'].values)
 
         read_fd, write_fd = os.pipe()
