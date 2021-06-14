@@ -65,48 +65,37 @@ def ts_to_bcf_single(
 
         
         # Obtain a list of the individuals and their nodes:
-        ind_ids = []
-        ind_nodes = []
+        node_table = []
+        individual_table = []
 
         for ind in ts.individuals():
             if len(ind.nodes) == 2:
-                ind_ids.extend([ind, ind])
-                ind_nodes.extend(ind.nodes)
+                node_table.extend([{'Node': ind.nodes[i], 'Individual': ind.id} for i in range(2)])
+                individual_table.append({'Individual': ind.id, 'IndividualName': ind.metadata["individual_name"]})
 
-        # Construct a dataframe of those individuals:
-        ind_df = pd.DataFrame({'Individual ID': ind_ids, 'Nodes': ind_nodes})
+        # Construct a dataframe of the nodes:
+        node_df = pd.DataFrame(node_table)
+        # Construct a dataframe of individuals:
+        individual_df = pd.DataFrame(individual_table)
 
         # Merge with the sampled nodes list:
-        merged_df = ind_df.merge(pd.DataFrame({'Nodes': sample_nodes}))
+        merged_df = node_df.merge(pd.DataFrame({'Node': sample_nodes}))
         
         # Count how many times an individual ID occurs in the merged table:
-        ind_counts = merged_df['Individual ID'].value_counts()
+        ind_counts = merged_df['Individual'].value_counts()
 
-        # Keep only individuals that occur twice:
+        # Keep only individuals that occur twice (i.e. are diploid):
         sample_individuals = list(ind_counts[ind_counts == 2].index)
-        
-        # Shadi: This portion of the code can be slow for large pedigrees, replacing 
-        # with pandas merge above.
-        
-        #sample_individuals = []
-        #for ind in ts.individuals():
-        #    if len(ind.nodes) == 0:
-        #        continue
-        #    # diploid - two nodes, both the same individual
-        #    if ind.nodes[0] in sample_nodes:
-        #        assert len(ind.nodes) == 2
-        #        assert ind.nodes[1] in sample_nodes
-        #        sample_individuals.append(ind)
 
         if n_subsample is not None:
             sample_individuals = np.random.choice(
                 sample_individuals, n_subsample, replace=False
             )
 
-        sample_names = [
-            str(ind.metadata["individual_name"]) for ind in sample_individuals
-        ]
-        sample_ids = [ind.id for ind in sample_individuals]
+        final_list = individual_df.merge(pd.DataFrame({'Individual': sample_individuals}))
+        
+        sample_names = list(final_list['IndividualName'].values)
+        sample_ids = list(final_list['Individual'].values)
 
         read_fd, write_fd = os.pipe()
         write_pipe = os.fdopen(write_fd, "w")
