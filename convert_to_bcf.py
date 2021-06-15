@@ -25,13 +25,12 @@ class Runner:
             subprocess.run(cmd, shell=True, check=True)
 
 
-# TODO - provide a way to subsample based on a file with IDs
 def ts_to_bcf_single(
     ts_file,
     out_file,
     runner,
     af_cutoff=0,
-    n_subsample=None,
+    keep_sample=None,
     remove_singletons=False,
     use_vcf=False,
 ):
@@ -63,7 +62,6 @@ def ts_to_bcf_single(
             tables.delete_sites(sites_to_delete, record_provenance=False)
             ts = tables.tree_sequence()
 
-        
         # Obtain a list of the individuals and their nodes:
         node_table = []
         individual_table = []
@@ -87,14 +85,13 @@ def ts_to_bcf_single(
         # Keep only individuals that occur twice (i.e. are diploid):
         sample_individuals = list(ind_counts[ind_counts == 2].index)
 
-        if n_subsample is not None:
-            sample_individuals = np.random.choice(
-                sample_individuals, n_subsample, replace=False
-            )
-
         final_list = individual_df.merge(pd.DataFrame({'Individual': sample_individuals}))
+        final_list['IndividualName'] = final_list['IndividualName'].astype(str)
+
+        if keep_sample is not None:
+            final_list = final_list.merge(keep_sample)
         
-        sample_names = list(final_list['IndividualName'].astype(str).values)
+        sample_names = list(final_list['IndividualName'].values)
         sample_ids = list(final_list['Individual'].values)
 
         read_fd, write_fd = os.pipe()
@@ -142,6 +139,16 @@ def main(args):
     out_file = os.path.expanduser(args.out_file)
     runner = Runner(args)
 
+    if args.keep_file is None:
+        keep = None
+    else:
+        try:
+            keep = pd.read_csv(args.keep_file, header=None, names=['IndividualName'])
+            keep['IndividualName'] = keep['IndividualName'].astype(str)
+        except Exception as e:
+            print("Failed to read the sample filter file!")
+            raise e
+
     tmp_bcf_files = []
     with tempfile.TemporaryDirectory() as tmpdirname:
         for i, tsf in enumerate(args.ts_file):
@@ -154,7 +161,7 @@ def main(args):
                 tmp_bcf_file,
                 runner,
                 af_cutoff=args.af_cutoff,
-                n_subsample=args.n_subsample,
+                keep_sample=keep,
                 remove_singletons=args.remove_singletons,
                 use_vcf=args.use_vcf,
             )
@@ -168,11 +175,11 @@ if __name__ == "__main__":
     parser.add_argument("ts_file", nargs="*")
     parser.add_argument("out_file")
     parser.add_argument(
-        "-s",
-        "--n_subsample",
-        type=int,
+        "--keep-file",
+        type=str,
         default=None,
-        help="Randomly sumbsample this many individuals. Default - all",
+        dest='keep_file',
+        help="A file of individual IDs (with no header) to output to the BCF file.",
     )
     parser.add_argument(
         "-f",
